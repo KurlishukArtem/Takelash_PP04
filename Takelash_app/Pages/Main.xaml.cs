@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Takelash_app.Pages
 {
@@ -55,6 +57,63 @@ namespace Takelash_app.Pages
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void EXEL_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog SFD = new SaveFileDialog
+            {
+                InitialDirectory = @"C:",
+                Filter = "Excel Files (*.xlsx)|*.xlsx"
+            };
+            if (SFD.ShowDialog() == true)
+            {
+                var ExcelApp = new Excel.Application();
+                Excel.Workbook Workbook = null;
+                Excel.Worksheet Worksheet = null;
+                try
+                {
+                    ExcelApp.Visible = false;
+                    Workbook = ExcelApp.Workbooks.Add(Type.Missing);
+                    Worksheet = (Excel.Worksheet)Workbook.ActiveSheet;
+                    (Worksheet.Cells[1, 1] as Excel.Range).Value = $"Отчет о Партнерах: ";
+                    int Row = 2;
+
+                    // Заголовки
+                    (Worksheet.Cells[Row, 1] as Excel.Range).Value = "Наименование";
+                    (Worksheet.Cells[Row, 2] as Excel.Range).Value = "Описание";
+                    (Worksheet.Cells[Row, 3] as Excel.Range).Value = "Дата";
+                    (Worksheet.Cells[Row, 4] as Excel.Range).Value = "Номер телефона";
+                    Row++;
+
+                    foreach (Classes.Client Zal_Item in _context.Clients)
+                    {
+                        (Worksheet.Cells[Row, 1] as Excel.Range).Value = $"{Zal_Item.Name}";
+                        (Worksheet.Cells[Row, 2] as Excel.Range).Value = $"{Zal_Item.Description}";
+                        (Worksheet.Cells[Row, 3] as Excel.Range).Value = $"{Zal_Item.Date}";
+                        (Worksheet.Cells[Row, 4] as Excel.Range).Value = $"{Zal_Item.Phone}";
+                        Row++;
+                    }
+
+                    Workbook.SaveAs(SFD.FileName);
+                }
+                catch (Exception exp)
+                {
+                    MessageBox.Show(exp.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    // Закрываем и освобождаем ресурсы
+                    if (Worksheet != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(Worksheet);
+                    if (Workbook != null)
+                    {
+                        Workbook.Close();
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(Workbook);
+                    }
+                    ExcelApp.Quit();
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(ExcelApp);
+                }
+            }
         }
     }
 }

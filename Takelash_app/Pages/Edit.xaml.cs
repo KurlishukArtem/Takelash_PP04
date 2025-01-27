@@ -59,7 +59,7 @@ namespace Takelash_app.Pages
                 MessageBox.Show("Не указана дата", "Заполните поле!", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (!Regex.IsMatch(tb_phone.Text, @"^8\d{10}$"))
+            if (!Regex.IsMatch(tb_phone.Text, @"^\d{10}$"))
             {
                 MessageBox.Show("Неверный номер телефона", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
